@@ -4,12 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using Vector2 = System.Numerics.Vector2;
 
-public class Tile : MonoBehaviour
+public class Tile : MonoBehaviour , ITickable
 {
-    public Vector2Int Coordinate;
-
+    [HideInInspector] public Vector2Int Coordinate;
+    [SerializeField] private SpriteRenderer _crossSign;
     private void OnMouseDown()
     {
-        throw new NotImplementedException();
+        
+    }
+
+    public void OnTick()
+    {
+        _crossSign.gameObject.SetActive(true);
+    }
+
+    public void OnUnTick()
+    {   
+        _crossSign.gameObject.SetActive(false);
     }
 }

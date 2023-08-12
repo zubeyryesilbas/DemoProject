@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,12 @@ public class GridController : MonoBehaviour
     [SerializeField] private float _tileSize;
     [SerializeField] private GameObject _tilePrefab;
     private Tile[,] _tilesInGrid;
-    
+
+    private void Start()
+    {
+        GenerateGrid();
+    }
+
     private void GenerateGrid()
     { 
         _tilesInGrid = new Tile [_gridSizeX , _gridSizeY];
