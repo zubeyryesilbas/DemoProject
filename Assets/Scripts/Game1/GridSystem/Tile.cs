@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 using Vector2 = System.Numerics.Vector2;
 
 public class Tile : MonoBehaviour , ITickable
@@ -9,9 +10,13 @@ public class Tile : MonoBehaviour , ITickable
     [HideInInspector] public Vector2Int Coordinate;
     [SerializeField] private SpriteRenderer _crossSign;
     private GridController _gridController;
-
     public bool IsThicked { get; set; }
-
+    [Inject]
+    public  void Construct(GridController gridController)
+    {
+        this._gridController = gridController;
+    }
+    
     private void OnMouseDown()
     {
         if(!IsThicked)

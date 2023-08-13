@@ -7,15 +7,13 @@ using UnityEngine;
 
 public class GridController : MonoBehaviour
 {
-    [SerializeField] private int _gridSize;
-    [SerializeField] private float _tileSize;
     [SerializeField] private Tile _tilePrefab;
     [SerializeField] private Tile[,] _tilesInGrid;
     private Transform _gridHolderTransform;
 
-    private void Start()
+    private void Awake()
     {
-        GenerateGrid(_gridSize);
+        GenerateGrid(GridConstants.GridStartSize);
     }
 
     private void GenerateGrid(int gridSize)
@@ -32,8 +30,8 @@ public class GridController : MonoBehaviour
             for (var j = 0; j < gridSize; j++)
             {
                 var tile = Instantiate(_tilePrefab, _gridHolderTransform);
-                var posX = i * _tileSize;
-                var posY = j * _tileSize;
+                var posX = i * GridConstants.TileSize;
+                var posY = j * GridConstants.TileSize;
                 tile.Coordinate = new Vector2Int(i, j);
                 tile.name = ("tile " + i + " ," + j);
                 tile.transform.position = new Vector2(posX, posY);
@@ -72,85 +70,55 @@ public class GridController : MonoBehaviour
 
     public void CheckMatchesOnGrid(Tile tile)
     {
-        var referencedNeighborChainList = new List<Tile>();
-        GetThickedNeighboursOfATile(referencedNeighborChainList, tile);
+        var referencedNeighborChainList = GetThickedNeighboursOfATile(tile);
         Debug.Log(referencedNeighborChainList.Count);
-        if (referencedNeighborChainList.Count > 2)
+    
+        if (referencedNeighborChainList.Count >= GridConstants.NeighborDetectionNumber)
         {
             foreach (var neighbortile in referencedNeighborChainList)
             {
                 neighbortile.OnUnTick();
             } 
         }
-            
     }
 
-    private void GetThickedNeighboursOfATile(List<Tile> neighborList, Tile tile)
+    private HashSet<Tile> GetThickedNeighboursOfATile(Tile tile)
     {
+        var neighborList = new HashSet<Tile>();
+        var queue = new Queue<Tile>();
+
         var gridSize = _tilesInGrid.GetLength(0);
-        var upCoordinate = new Vector2Int(tile.Coordinate.x, tile.Coordinate.y + 1);
-        var downCoordinate = new Vector2Int(tile.Coordinate.x, tile.Coordinate.y - 1);
-        var leftCoordinate = new Vector2Int(tile.Coordinate.x - 1, tile.Coordinate.y);
-        var rightCoordinate = new Vector2Int(tile.Coordinate.x + 1, tile.Coordinate.y);
-        var hasNewNeighbor = false;
-        var newNeighbors = new List<Tile>();
-        if (upCoordinate.y < gridSize)
-        {
-            var upTile = _tilesInGrid[upCoordinate.x, upCoordinate.y];
-            if (upTile.IsThicked && !neighborList.Contains(upTile))
-            {
-                hasNewNeighbor = true;
-                neighborList.Add(upTile);
-                newNeighbors.Add((upTile));
-            }
-        }
+        queue.Enqueue(tile);
 
-        if (downCoordinate.y >= 0)
+        while (queue.Count > 0)
         {
-            var downTile = _tilesInGrid[downCoordinate.x, downCoordinate.y];
-            if (downTile.IsThicked && !neighborList.Contains(downTile))
-            {
-                hasNewNeighbor = true;
-                neighborList.Add(downTile);
-                newNeighbors.Add(downTile);
-            }
-        }
+            var currentTile = queue.Dequeue();
 
-        if (leftCoordinate.x >= 0)
-        {
-            var leftTile = _tilesInGrid[leftCoordinate.x, leftCoordinate.y];
-            if (leftTile.IsThicked && !neighborList.Contains(leftTile))
+            var directions = new Vector2Int[]
             {
-                hasNewNeighbor = true;
-                neighborList.Add(leftTile);
-                newNeighbors.Add(leftTile);
-            }
-        }
+                new Vector2Int(0, 1),  // Up
+                new Vector2Int(0, -1), // Down
+                new Vector2Int(-1, 0), // Left
+                new Vector2Int(1, 0)   // Right
+            };
 
-        if (rightCoordinate.x < gridSize)
-        {
-            var rightTile = _tilesInGrid[rightCoordinate.x, rightCoordinate.y];
-            if (rightTile.IsThicked && !neighborList.Contains(rightTile))
+            foreach (var direction in directions)
             {
-                hasNewNeighbor = true;
-                neighborList.Add(rightTile);
-                newNeighbors.Add(rightTile);
-            }
+                var neighborCoordinate = currentTile.Coordinate + direction;
 
-            if (hasNewNeighbor)
-            {
-                foreach (var neighborTile in newNeighbors)
+                if (neighborCoordinate.x >= 0 && neighborCoordinate.x < gridSize &&
+                    neighborCoordinate.y >= 0 && neighborCoordinate.y < gridSize)
                 {
-                    GetThickedNeighboursOfATile(neighborList, neighborTile);
+                    var neighborTile = _tilesInGrid[neighborCoordinate.x, neighborCoordinate.y];
+
+                    if (neighborTile.IsThicked && neighborList.Add(neighborTile))
+                    {
+                        queue.Enqueue(neighborTile);
+                    }
                 }
             }
-            else
-            {
-                return;
-            }
-
-            if (neighborList.Count > 0 && !neighborList.Contains(tile))
-                neighborList.Add(tile);
         }
+
+        return neighborList;
     }
 }

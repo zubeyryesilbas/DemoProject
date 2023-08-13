@@ -11,9 +11,10 @@ public class GridSwitchController : MonoBehaviour
 {
    private GridController _gridController;
    private CameraAutoAligner _cameraAutoAliner;
+   private int _counterNumber = 3;
    [SerializeField] private Button _switchButtonLeft, _switchButtonRight , _resetGridButton;
    [SerializeField] private TextMeshProUGUI _counterText;
-   private int _counterNumber = 3;
+   
    
    [Inject]
    public  void Construct(GridController gridController , CameraAutoAligner cameraAutoAligner)
@@ -23,12 +24,10 @@ public class GridSwitchController : MonoBehaviour
    }
 
    private  void Start()
-   {
-      if(_gridController != null)
-         Debug.Log("Setup is Correct");
-       
+   {  
       SetButtonsClicks();
       UpdateCounterText();
+      OnResetGridButtonClicked();
    }
 
    private void SetButtonsClicks()
@@ -47,9 +46,9 @@ public class GridSwitchController : MonoBehaviour
    private void OnSwitchLeft()
    {  
       _counterNumber --;
-      if(_counterNumber < 2)
+      if(_counterNumber < GridConstants.MinGridSize)
       {
-         _counterNumber = 2;
+         _counterNumber = GridConstants.MinGridSize;
       }   
 
       UpdateCounterText();   
@@ -58,11 +57,10 @@ public class GridSwitchController : MonoBehaviour
    private void OnSwitchRight()
    {
       _counterNumber ++;
-      if(_counterNumber > 20)
+      if(_counterNumber > GridConstants.MaxGridSize)
       {
-         _counterNumber = 20;
+         _counterNumber = GridConstants.MaxGridSize;
       }
-
       UpdateCounterText();
    }
 

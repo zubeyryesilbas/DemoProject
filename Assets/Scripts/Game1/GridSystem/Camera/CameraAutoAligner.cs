@@ -14,7 +14,7 @@ public class CameraAutoAligner : MonoBehaviour
     {
         this._gridController = gridController;
     }
-    private void Start()
+    private void Awake()
     {
         _mainCamera = Camera.main;
     }
@@ -22,7 +22,7 @@ public class CameraAutoAligner : MonoBehaviour
     public void AlignCamera()
     {
         _mainCamera.transform.position = _gridController.GetCenterPointOfGrid() - Vector3.forward;
-        _mainCamera.orthographicSize = _gridController.GetSizeOfGrid();
+        _mainCamera.orthographicSize = _gridController.GetSizeOfGrid() * GridConstants.TileSize;
     }
 
     private void Update()
