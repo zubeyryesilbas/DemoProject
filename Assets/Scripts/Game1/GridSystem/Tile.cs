@@ -8,6 +8,7 @@ public class Tile : MonoBehaviour , ITickable
 {
     [HideInInspector] public Vector2Int Coordinate;
     [SerializeField] private SpriteRenderer _crossSign;
+    private GridController _gridController;
 
     public bool IsThicked { get; set; }
 
@@ -17,13 +18,21 @@ public class Tile : MonoBehaviour , ITickable
             OnTick();
     }
 
+    private void Start()
+    {
+        _gridController = FindObjectOfType<GridController>();
+    }
+
     public void OnTick()
     {
         _crossSign.gameObject.SetActive(true);
+        IsThicked = true;
+        _gridController.CheckMatchesOnGrid(this);
     }
 
     public void OnUnTick()
-    {   
+    {
+        IsThicked = false;
         _crossSign.gameObject.SetActive(false);
     }
 }
