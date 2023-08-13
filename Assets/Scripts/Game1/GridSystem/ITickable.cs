@@ -6,4 +6,6 @@ public interface ITickable
 {
     void OnTick();
     void OnUnTick();
+
+    bool IsThicked {get; set;}
 }
