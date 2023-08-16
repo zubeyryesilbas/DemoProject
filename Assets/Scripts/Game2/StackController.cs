@@ -21,10 +21,12 @@ public class StackController : MonoBehaviour
     [SerializeField] private float _minWalkDistance;
     [SerializeField] private float _animationDuration;
     private TapController _tapController;
+    private StackSoundController _stackSoundController;
     [Inject]
-    public  void Construct(TapController tapController)
+    public  void Construct(TapController tapController , StackSoundController stackSoundController) 
     {
         this._tapController = tapController;
+        this._stackSoundController = stackSoundController;
     }
     void OnEnable()
     {
@@ -70,8 +72,8 @@ public class StackController : MonoBehaviour
         var differenceAbs = Mathf.Abs(difference);
         var sign = Mathf.Sign(difference); 
         if(differenceAbs <= _tolaranceValue)
-        {
-
+        {   Debug.Log("Perfect");
+            _stackSoundController.PlayWithPitch();
         }
         else if(differenceAbs <= _minWalkDistance)
         {
