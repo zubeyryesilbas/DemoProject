@@ -7,6 +7,7 @@ public  interface Istackable
     void OnStack(Vector3 postion);
     void SetMaterialColor(Color color);
     void SetScale(Vector3 scale);
+    void SetUnKinematic();
     Transform StackableTransform{get;}
 
 }
