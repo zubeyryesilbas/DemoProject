@@ -21,7 +21,7 @@ public class StackSoundController : MonoBehaviour
 
     private IEnumerator ResetPitchCoroutine()
     {
-        yield return new WaitForSecondsRealtime(1f);
+        yield return new WaitForSecondsRealtime(2f);
         _audioSource.pitch = 1f;
     }
 }

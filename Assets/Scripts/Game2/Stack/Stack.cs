@@ -9,13 +9,13 @@ public class Stack : MonoBehaviour, Istackable
 {
    [SerializeField] private MeshRenderer _renderer;
     private Rigidbody _rb;
-
     public Transform StackableTransform => transform;
-
+    public bool IsWalkable{get ; set;}
     public void Awake()
     {
         _rb = GetComponent<Rigidbody>();
         _rb.isKinematic = true;
+        IsWalkable = true;
     }
     
     public void SetUnKinematic()

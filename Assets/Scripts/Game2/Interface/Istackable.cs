@@ -9,5 +9,6 @@ public  interface Istackable
     void SetScale(Vector3 scale);
     void SetUnKinematic();
     Transform StackableTransform{get;}
+    bool IsWalkable {get; set;}
 
 }
