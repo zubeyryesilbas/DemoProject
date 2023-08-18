@@ -50,11 +50,12 @@ public class StackController : MonoBehaviour
         CurrentStackPosition = _startPointTransform.position + _currentScale.z * Vector3.right;
         _currentScale = _stackPrefab.transform.localScale; 
         _distanceBetweenStartAndEndPoint = _endPointTransform.position.z - _startPointTransform.position.z; 
-        var endPointy = _endPointTransform.position.y;
+        var endPointy = 0;
         var endPointPosition =  CurrentStackPosition + _maxStackCount * Vector3.forward * _stackPrefab.transform.localScale.z;
         _endPointTransform.position = endPointPosition;
         _stackCount = 1;
         CreateNewStack();
+        _endPointTransform.position = new Vector3(_endPointTransform.position.x , 0f , _endPointTransform.position.z);
     }    
     public void CreateNewStack()
     {   
@@ -83,16 +84,16 @@ public class StackController : MonoBehaviour
     }
     public void CreateNewLevelsPlatform()
     {
-        _startPointTransform.position = _endPointTransform.position ;
+        _startPointTransform.position = new Vector3(_endPointTransform.position.x , _startPointTransform.position.y , _endPointTransform.position.z) ;
         CurrentStackPosition = _startPointTransform.position  ;
-        var _endY = _endPointTransform.position.y;
-         _currentScale = _stackPrefab.transform.localScale; 
-         var spawnPos = _startPointTransform.position + Vector3.forward * _distanceBetweenStartAndEndPoint + Vector3.forward * _stackPrefab.transform.localScale.z;
-         spawnPos.y = _endY;
-         var newEndPoint = Instantiate(_endPointTransform.gameObject , _endPointTransform.position , quaternion.identity);
+        var _endY = 0f;
+        _currentScale = _stackPrefab.transform.localScale; 
+        var spawnPos = _startPointTransform.position + Vector3.forward * _distanceBetweenStartAndEndPoint + Vector3.forward * _stackPrefab.transform.localScale.z;
+        spawnPos.y = _endY;
+        var newEndPoint = Instantiate(_endPointTransform.gameObject , _endPointTransform.position , quaternion.identity);
         _endPointTransform.position = spawnPos;
-         _startPointTransform.gameObject.SetActive(false);
-         _stackCount = 0;
+        _startPointTransform.gameObject.SetActive(false);
+        _stackCount = 0;
     }
     private void ComparePositions(Vector3 stackablePos)
     {

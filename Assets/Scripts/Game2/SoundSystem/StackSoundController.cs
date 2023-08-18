@@ -16,12 +16,12 @@ public class StackSoundController : MonoBehaviour
     {   
         _audioSource.PlayOneShot(_audioSource.clip);
         _playPitchCo = StartCoroutine(ResetPitchCoroutine());
-        _audioSource.pitch -= 0.05f;
+        _audioSource.pitch -= 0.06f;
     }
 
     private IEnumerator ResetPitchCoroutine()
     {
-        yield return new WaitForSecondsRealtime(2f);
+        yield return new WaitForSecondsRealtime(4f);
         _audioSource.pitch = 1f;
     }
 }

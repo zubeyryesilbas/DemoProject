@@ -21,7 +21,8 @@ public class CharacterAnimationController : MonoBehaviour
     }
 
     public void SetRun()
-    {
+    {  
+         transform.rotation = Quaternion.Euler(0 , 0 , 0);
         _anim.SetBool(_dancingHash , false);
         _anim.SetBool(_runningHash , true);
     }

@@ -4,6 +4,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 using Zenject;
 using DG.Tweening;
+using Unity.Mathematics;
+
 public class CharacterMovementController : MonoBehaviour
 {
     private Rigidbody _rb;
@@ -31,11 +33,12 @@ public class CharacterMovementController : MonoBehaviour
     }
     private void MoveToTarget()
     {   
+        transform.rotation = quaternion.Euler(0 , 0 , 0);
         if(!_canRun)
             return;
         _moveHorizontalTween =  transform.DOMoveX(_stackController.CurrentStackPosition.x , 0.7f);
         _moveForwardTween =   transform.DOMoveZ(_stackController.NextStackPosition.z , 8.5f);
-        
+
         _moveSequence.Append(_moveHorizontalTween);
         _moveSequence.Append(_moveForwardTween);
         _moveSequence.Play();
