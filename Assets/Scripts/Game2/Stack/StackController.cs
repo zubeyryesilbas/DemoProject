@@ -19,7 +19,7 @@ public class StackController : MonoBehaviour
     private StackSoundController _stackSoundController;
     private StackColorManager _stackColorManager;
     private int _stackCount;
-    private int _stackSign;
+    private int _stackSign = 1;
     private int _maxStackCount = 20;
     private float _endPlatformSize;
     private float _stackZSize;
@@ -76,10 +76,7 @@ public class StackController : MonoBehaviour
         _currentStackable.SetScale(_currentScale);
         CurrentStackPosition += Vector3.forward * _stackZSize;
         var random = UnityEngine.Random.Range(0 , 2);
-        if(random == 1)
-            _stackSign = -1;
-        else
-            _stackSign = 1;
+        _stackSign *= -1;
         NextStackPosition = CurrentStackPosition + Vector3.forward * _stackZSize;
         var positionRight = CurrentStackPosition + _currentScale.x * Vector3.right * _stackSign;
         var positionLeft = CurrentStackPosition + _currentScale.x * Vector3.left * _stackSign;
