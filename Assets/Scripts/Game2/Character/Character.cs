@@ -20,6 +20,6 @@ public class Character : MonoBehaviour
         transform.rotation = quaternion.Euler(0 , 0 ,0);
         CameraRotatingObject.DisableRotation();
         _characterAnimController.SetRun();
-        _characterMovementController.StartMovement();
+        _characterMovementController.ForceMovement();
     }
 }

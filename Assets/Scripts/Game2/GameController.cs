@@ -27,16 +27,17 @@ public class GameController : MonoBehaviour
     }
     public async void RestartLevel()
     {   
-        _gameUiController.ShowLevelLost();
-        await Task.Delay(Mathf.FloorToInt(4000)); 
-        SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
+        await Task.Delay(Mathf.FloorToInt(1000)); 
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     public async void StartNextLevel()
     {
         _cameraController.ActivateFollowCamera();
-         _stackController.CreateNewStack();
-         await Task.Delay(Mathf.FloorToInt(700));
+        await Task.Delay(Mathf.FloorToInt(1500));
         _character.StartMovement();
+        await Task.Delay(Mathf.FloorToInt(300));
+        _stackController.CreateNewStartPlatfom();
+        _stackController.CreateNewStack();
         _tapController.EnableTap();
        
     }
@@ -47,5 +48,10 @@ public class GameController : MonoBehaviour
         _character.SetLevelSuccessAction();
         _cameraController.ActivateRotationCamera();
         _gameUiController.ShowLevelWin();
+    }
+
+    public void LevelLost()
+    {
+       _gameUiController.ShowLevelLost();
     }
 }

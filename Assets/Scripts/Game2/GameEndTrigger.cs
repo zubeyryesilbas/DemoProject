@@ -16,7 +16,7 @@ public class GameEndTrigger : MonoBehaviour
     {
         if(collider.CompareTag("player"))
         {
-            _gameController.RestartLevel();
+            _gameController.LevelLost();
         }
     }
 }

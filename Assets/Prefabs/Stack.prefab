@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7251996162598062753}
   - component: {fileID: 91858935255502291}
   m_Layer: 0
-  m_Name: Stack (5)
+  m_Name: Stack
   m_TagString: stack
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

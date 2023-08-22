@@ -32,16 +32,24 @@ public class CharacterMovementController : MonoBehaviour
         _rb.isKinematic = true;
     }
     private void MoveToTarget()
-    {   
-        transform.rotation = quaternion.Euler(0 , 0 , 0);
+    {    
         if(!_canRun)
             return;
-        _moveHorizontalTween =  transform.DOMoveX(_stackController.CurrentStackPosition.x , 0.7f);
-        _moveForwardTween =   transform.DOMoveZ(_stackController.NextStackPosition.z , 8.5f);
+            
+        if(_moveForwardTween != null) _moveForwardTween.Kill();
 
-        _moveSequence.Append(_moveHorizontalTween);
-        _moveSequence.Append(_moveForwardTween);
-        _moveSequence.Play();
+        if(_moveHorizontalTween != null) _moveHorizontalTween.Kill();
+
+        _moveHorizontalTween =  transform.DOMoveX(_stackController.CurrentStackPosition.x , 0.7f).SetEase(Ease.Linear);
+        var speed = Vector3.Distance(_stackController.CurrentStackPosition , transform.position) /2.6f;
+        _moveForwardTween =   transform.DOMoveZ(_stackController.NextStackPosition.z , 8.5f / speed).SetEase(Ease.Linear);
+    }
+    public void ForceMovement()
+    {   
+        var centerPoint = new Vector3(_stackController.CurrentStackPosition.x , 0 , _stackController.CurrentStackPosition.z);
+        transform.DOMove(centerPoint , 0.3f);
+        StartMovement();
+        MoveToTarget();
     }
     public void StopMovement()
     {

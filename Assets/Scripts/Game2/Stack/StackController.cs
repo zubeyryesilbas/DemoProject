@@ -6,29 +6,33 @@ using DG.Tweening;
 using Unity.Mathematics;
 using Zenject;
 using System;
-using UnityEditor.Experimental.GraphView;
 
 public class StackController : MonoBehaviour
 {
     private Tween _stackTween;
-    public Action OnStackHappened;
     private DG.Tweening.Sequence _stackSequence;
     private Istackable _currentStackable;
     private Vector3 _currentScale;
-    public Vector3 CurrentStackPosition;
-    public Vector3 NextStackPosition;
     private Color _currentColor;
     private float _distanceBetweenStartAndEndPoint;
+    private TapController _tapController;
+    private StackSoundController _stackSoundController;
+    private StackColorManager _stackColorManager;
+    private int _stackCount;
+    private int _stackSign;
+    private int _maxStackCount = 20;
+    private float _endPlatformSize;
+    private float _stackZSize;
+    
     [SerializeField] private Transform _startPointTransform , _endPointTransform;
     [SerializeField] private Stack _stackPrefab;
     [SerializeField] private float _tolaranceValue;
     [SerializeField] private float _minWalkDistance;
     [SerializeField] private float _animationDuration;
-    private TapController _tapController;
-    private StackSoundController _stackSoundController;
-    private StackColorManager _stackColorManager;
-    private int _stackCount;
-    private int _maxStackCount = 20;
+    [HideInInspector] public Vector3 CurrentStackPosition;
+    [HideInInspector] public Vector3 NextStackPosition;
+    public Action OnStackHappened;
+   
     [Inject]
     public  void Construct(TapController tapController , StackSoundController stackSoundController , StackColorManager stackColorManager) 
     {
@@ -47,16 +51,22 @@ public class StackController : MonoBehaviour
 
     public void Start()
     {   
-        CurrentStackPosition = _startPointTransform.position + _currentScale.z * Vector3.right;
+        Initialize();
+    }    
+
+    private void Initialize()
+    {   
+        CurrentStackPosition = _startPointTransform.position;
         _currentScale = _stackPrefab.transform.localScale; 
+        _stackZSize = _currentScale.z;
+        _endPlatformSize = _endPointTransform.GetComponent<MeshRenderer>().bounds.size.z;
         _distanceBetweenStartAndEndPoint = _endPointTransform.position.z - _startPointTransform.position.z; 
-        var endPointy = 0;
-        var endPointPosition =  CurrentStackPosition + _maxStackCount * Vector3.forward * _stackPrefab.transform.localScale.z;
+        var endPointPosition =  CurrentStackPosition + (_maxStackCount -1) * Vector3.forward * _stackZSize + Vector3.forward * _endPlatformSize ;
         _endPointTransform.position = endPointPosition;
         _stackCount = 1;
         CreateNewStack();
         _endPointTransform.position = new Vector3(_endPointTransform.position.x , 0f , _endPointTransform.position.z);
-    }    
+    }
     public void CreateNewStack()
     {   
         var stackInstance = Instantiate(_stackPrefab , CurrentStackPosition , quaternion.identity);
@@ -64,10 +74,15 @@ public class StackController : MonoBehaviour
         _currentColor = _stackColorManager.GetMaterial().color;
         _currentStackable.SetMaterialColor(_currentColor);
         _currentStackable.SetScale(_currentScale);
-        CurrentStackPosition += Vector3.forward * _currentScale.z;
-        NextStackPosition = CurrentStackPosition + Vector3.forward * _currentScale.z;
-        var positionRight = CurrentStackPosition + _currentScale.x * Vector3.right;
-        var positionLeft = CurrentStackPosition + _currentScale.x * Vector3.left;
+        CurrentStackPosition += Vector3.forward * _stackZSize;
+        var random = UnityEngine.Random.Range(0 , 2);
+        if(random == 1)
+            _stackSign = -1;
+        else
+            _stackSign = 1;
+        NextStackPosition = CurrentStackPosition + Vector3.forward * _stackZSize;
+        var positionRight = CurrentStackPosition + _currentScale.x * Vector3.right * _stackSign;
+        var positionLeft = CurrentStackPosition + _currentScale.x * Vector3.left * _stackSign;
         _currentStackable.StackableTransform.position = positionRight;
         _stackTween = _currentStackable.StackableTransform.DOMove(positionLeft , _animationDuration)
         .SetLoops(-1 , LoopType.Yoyo).SetEase(Ease.Linear);
@@ -83,17 +98,24 @@ public class StackController : MonoBehaviour
         }    
     }
     public void CreateNewLevelsPlatform()
-    {
+    {   
         _startPointTransform.position = new Vector3(_endPointTransform.position.x , _startPointTransform.position.y , _endPointTransform.position.z) ;
         CurrentStackPosition = _startPointTransform.position  ;
         var _endY = 0f;
         _currentScale = _stackPrefab.transform.localScale; 
-        var spawnPos = _startPointTransform.position + Vector3.forward * _distanceBetweenStartAndEndPoint + Vector3.forward * _stackPrefab.transform.localScale.z;
+        var spawnPos = _startPointTransform.position + Vector3.forward * (_distanceBetweenStartAndEndPoint - _stackZSize+ _endPlatformSize) + Vector3.forward * _stackZSize;
         spawnPos.y = _endY;
-        var newEndPoint = Instantiate(_endPointTransform.gameObject , _endPointTransform.position , quaternion.identity);
+        Instantiate(_endPointTransform.gameObject , _endPointTransform.position , quaternion.identity);
         _endPointTransform.position = spawnPos;
         _startPointTransform.gameObject.SetActive(false);
         _stackCount = 0;
+    }
+
+    public void CreateNewStartPlatfom()
+    {   
+        _stackCount +=1;
+        CurrentStackPosition += Vector3.forward * _stackPrefab.transform.localScale.z;
+        var stackInstance = Instantiate(_stackPrefab , CurrentStackPosition , quaternion.identity);
     }
     private void ComparePositions(Vector3 stackablePos)
     {
@@ -101,6 +123,7 @@ public class StackController : MonoBehaviour
         var differenceAbs = Mathf.Abs(difference);
         var sign = Mathf.Sign(difference); 
         var newSizeX = _currentScale.x -differenceAbs;
+        var perfectStack = false;
         if(newSizeX < _minWalkDistance)
         {   
             Debug.Log("final");
@@ -108,20 +131,26 @@ public class StackController : MonoBehaviour
         }
         if(differenceAbs <= _tolaranceValue)
         {   Debug.Log("Perfect");
+           
             _stackSoundController.PlayWithPitch();
+            var pos = new Vector3(CurrentStackPosition.x , CurrentStackPosition.y  ,_currentStackable.StackableTransform.position.z);
+            _currentStackable.StackableTransform.position = pos ;
+        }
+        else
+        {
+            var fallingBlockSize = Mathf.Abs(_currentStackable.StackableTransform.localScale.x - newSizeX);
+            var newPositionX = _currentStackable.StackableTransform.position.x - (difference /2);
+            _currentStackable.SetScale(new Vector3(newSizeX , _stackPrefab.transform.localScale.y , _stackZSize));
+            _currentStackable.StackableTransform.position = new Vector3(newPositionX , _currentStackable.StackableTransform.position.y , _currentStackable.StackableTransform.position.z);
+            var blockEdge = _currentStackable.StackableTransform.position.x + (newSizeX /2f * sign);
+            var fallingBlockPos = blockEdge + fallingBlockSize / 2f * sign;
+            _currentScale = _currentStackable.StackableTransform.localScale;
+            DropStack(fallingBlockPos , fallingBlockSize);
         }
        
-        
-        var fallingBlockSize = Mathf.Abs(_currentStackable.StackableTransform.localScale.x - newSizeX);
-        var newPositionX = _currentStackable.StackableTransform.position.x - (difference /2);
-        _currentStackable.SetScale(new Vector3(newSizeX , _stackPrefab.transform.localScale.y , _stackPrefab.transform.localScale.z));
-        _currentStackable.StackableTransform.position = new Vector3(newPositionX , _currentStackable.StackableTransform.position.y , _currentStackable.StackableTransform.position.z);
-
-        var blockEdge = _currentStackable.StackableTransform.position.x + (newSizeX /2f * sign);
-        var fallingBlockPos = blockEdge + fallingBlockSize / 2f * sign;
-         _currentScale = _currentStackable.StackableTransform.localScale;
-        DropStack(fallingBlockPos , fallingBlockSize);
+        CurrentStackPosition = _currentStackable.StackableTransform.position;
         _stackCount += 1;
+        
         if(_stackCount < _maxStackCount)
         {
             CreateNewStack();
@@ -136,9 +165,8 @@ public class StackController : MonoBehaviour
     {
         var stackable = Instantiate(_stackPrefab).GetComponent<Istackable>();
         stackable.SetMaterialColor(_currentColor);
-        stackable.SetScale(new Vector3(fallingBlockSize , stackable.StackableTransform.localScale.y , stackable.StackableTransform.localScale.z));
+        stackable.SetScale(new Vector3(fallingBlockSize , stackable.StackableTransform.localScale.y , _stackZSize));
         stackable.StackableTransform.position = new Vector3( fallingBlockXPos , _currentStackable.StackableTransform.position.y , _currentStackable.StackableTransform.position.z);
-        CurrentStackPosition = _currentStackable.StackableTransform.position;
         stackable.SetUnKinematic();
     }
 }

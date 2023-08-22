@@ -6,7 +6,7 @@ using Zenject;
 public class GameUiController : MonoBehaviour
 {
     [SerializeField] private GameObject _levelWinPanel , _levelLostPanel;
-    [SerializeField] private Button _nextLevelButton;
+    [SerializeField] private Button _nextLevelButton , _replayButton;
     private GameController _gameController;
 
     [Inject]
@@ -14,6 +14,7 @@ public class GameUiController : MonoBehaviour
     {
         this._gameController = gameController;
         _nextLevelButton.onClick.AddListener(OnNextLevelButtonClicked);
+        _replayButton.onClick.AddListener(OnLevelLostButtonClicked);
     }
     public void ShowLevelWin()
     {
@@ -28,6 +29,11 @@ public class GameUiController : MonoBehaviour
     {
         CloseAllPanels();
         _gameController.StartNextLevel();
+    }
+     private void OnLevelLostButtonClicked()
+    {
+        CloseAllPanels();
+        _gameController.RestartLevel();
     }
     public void CloseAllPanels()
     {
